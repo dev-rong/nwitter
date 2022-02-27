@@ -4,12 +4,14 @@ import {
     getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
     } from 'firebase/auth';
 
+
 const Auth = () => {
     
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [newAccount, setNewAccount] = useState(true);
     const auth = getAuth();
+    
     
     const onChange = (e) =>{
         const {target:{name, value}} = e;
@@ -23,11 +25,13 @@ const Auth = () => {
     const onSubmit = async (e) =>{ 
         e.preventDefault();
         try {
+            let data;
             if (newAccount) {
-                const data = await createUserWithEmailAndPassword(auth, email, password);
+                data = await createUserWithEmailAndPassword(auth, email, password);
             } else {
-                const data = await signInWithEmailAndPassword(auth, email, password);
+                data = await signInWithEmailAndPassword(auth, email, password);
             }
+            console.log(data)
         }
         catch (error) {
             console.log(error)
@@ -38,12 +42,21 @@ const Auth = () => {
         <>
         <form onSubmit={onSubmit}>
             
-            <input type="email" name="Email" 
-            value={email} onChange={onChange} 
-            placeholder="email" required/>
-            <input type="password" name="Password" 
-            value={password} onChange={onChange} 
-            placeholder="password" required/>
+            <input 
+            type="email" 
+            name="email" 
+            value={email} 
+            placeholder="email" 
+            required
+            onChange={onChange} 
+            />
+            <input type="password" 
+            name="password" 
+            value={password}
+            placeholder="password" 
+            required
+            onChange={onChange} 
+            />
             <input type="submit" value={newAccount? "Create Account": "Log In"}/>
             
         </form>    
