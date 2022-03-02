@@ -2,7 +2,8 @@ import {useState} from "react";
 import React from "react";
 import {
     getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-    } from 'firebase/auth';
+    GoogleAuthProvider, GithubAuthProvider,
+    signInWithPopup} from 'firebase/auth';
 
 
 const Auth = () => {
@@ -10,6 +11,7 @@ const Auth = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [newAccount, setNewAccount] = useState(true);
+    const [error, setError] = useState("");
     const auth = getAuth();
     
     
@@ -31,17 +33,32 @@ const Auth = () => {
             } else {
                 data = await signInWithEmailAndPassword(auth, email, password);
             }
-            console.log(data)
+            //console.log(data)
         }
         catch (error) {
-            console.log(error)
+            setError(error.message);
+        }
+    }
+
+    const onSocialClick = async (e) => {
+        const {target: {name}} = e
+        let provider;
+        if(name==="google"){
+           provider = new GoogleAuthProvider();
+           const result = await signInWithPopup(auth, provider);
+           const credential = GoogleAuthProvider.credentialFromResult(result);     
+        }
+        else if(name==="github"){
+            provider = new GithubAuthProvider();
+            const result = await signInWithPopup(auth, provider);
+           const credential = GithubAuthProvider.credentialFromResult(result);
+           console.log(credential)
         }
     }
 
     return(
         <>
-        <form onSubmit={onSubmit}>
-            
+        <form onSubmit={onSubmit}>          
             <input 
             type="email" 
             name="email" 
@@ -57,12 +74,12 @@ const Auth = () => {
             required
             onChange={onChange} 
             />
-            <input type="submit" value={newAccount? "Create Account": "Log In"}/>
-            
+            <input type="submit" value={newAccount? "Create Account": "Sign In"}/>
+            {/* {error} */}
         </form>    
             <div>
-                <button>Login with Google</button>
-                <button>Login with Github</button>
+                <button name="google" onClick={onSocialClick}>Login with Google</button>
+                <button name="github" onClick={onSocialClick}>Login with Github</button>
             </div>
         </>
     )
