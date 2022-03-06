@@ -1,19 +1,18 @@
 import {useState} from "react";
 import React from "react";
+import { authService } from "fbase";
 import {
-    getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
     GoogleAuthProvider, GithubAuthProvider,
-    signInWithPopup} from 'firebase/auth';
+    signInWithRedirect, getRedirectResult} from 'firebase/auth';
 
 
 const Auth = () => {
-    
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [newAccount, setNewAccount] = useState(true);
     const [error, setError] = useState("");
-    const auth = getAuth();
-    
     
     const onChange = (e) =>{
         const {target:{name, value}} = e;
@@ -27,13 +26,11 @@ const Auth = () => {
     const onSubmit = async (e) =>{ 
         e.preventDefault();
         try {
-            let data;
             if (newAccount) {
-                data = await createUserWithEmailAndPassword(auth, email, password);
+                await createUserWithEmailAndPassword(authService, email, password);
             } else {
-                data = await signInWithEmailAndPassword(auth, email, password);
+                await signInWithEmailAndPassword(authService, email, password);
             }
-            //console.log(data)
         }
         catch (error) {
             setError(error.message);
@@ -41,18 +38,18 @@ const Auth = () => {
     }
 
     const onSocialClick = async (e) => {
+        getRedirectResult(authService)
         const {target: {name}} = e
         let provider;
         if(name==="google"){
            provider = new GoogleAuthProvider();
-           const result = await signInWithPopup(auth, provider);
-           const credential = GoogleAuthProvider.credentialFromResult(result);     
+           const result = await signInWithRedirect(authService, provider);
+           GoogleAuthProvider.credentialFromResult(result);     
         }
         else if(name==="github"){
-            provider = new GithubAuthProvider();
-            const result = await signInWithPopup(auth, provider);
-           const credential = GithubAuthProvider.credentialFromResult(result);
-           console.log(credential)
+           provider = new GithubAuthProvider();
+           const result = await signInWithRedirect(authService, provider);
+           GithubAuthProvider.credentialFromResult(result);
         }
     }
 
@@ -67,20 +64,20 @@ const Auth = () => {
             required
             onChange={onChange} 
             />
-            <input type="password" 
+            <input 
+            type="password" 
             name="password" 
             value={password}
             placeholder="password" 
             required
             onChange={onChange} 
             />
-            <input type="submit" value={newAccount? "Create Account": "Sign In"}/>
-            {/* {error} */}
+            <input type="submit" value={newAccount? "Sign Up": "Sign In"}/>
         </form>    
-            <div>
-                <button name="google" onClick={onSocialClick}>Login with Google</button>
-                <button name="github" onClick={onSocialClick}>Login with Github</button>
-            </div>
+        <div>
+            <button name="google" onClick={onSocialClick}>Login with Google</button>
+            <button name="github" onClick={onSocialClick}>Login with Github</button>
+        </div>
         </>
     )
 }
