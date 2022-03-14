@@ -1,14 +1,19 @@
-import React from "react";
-import {useState} from "react";
+import React, {useState} from "react";
+import {Link} from "react-router-dom";
 import { authService } from "fbase";
 import {
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword} from 'firebase/auth';
+    signInWithEmailAndPassword
+        } from 'firebase/auth';
+import ResetPassword from './ResetPassword';
+import Eye from "icon/Eye";
+import EyeOff from "icon/EyeOff";
 
-const AuthForm = ({newAccount, toggleAccount}) => {
+const AuthForm = ({newAccount}) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");   
+    const [error, setError] = useState(""); 
+    const [showPW, setShowPW] = useState("password");  
 
     const onChange = (e) =>{
         const {target:{name, value}} = e;
@@ -33,30 +38,44 @@ const AuthForm = ({newAccount, toggleAccount}) => {
         }
     }
 
+    const showPassword = () => {
+        showPW==="password"? setShowPW("text"):setShowPW("password")
+    }
+
     return (
-        <>
-        <div>{newAccount? "Sign Up": "Sign In" } with Email and Password</div>
-        <form className="auth-form" onSubmit={onSubmit}>          
-            <input 
+        <> 
+        <form className="auth__form" onSubmit={onSubmit}>          
+            <label for="email">Email address</label>
+            <input className="auth__form--input"
+            id="email" 
             type="email" 
             name="email" 
-            value={email} 
-            placeholder="email" 
+            value={email}              
             required
             onChange={onChange} 
             />
-            <input 
-            type="password" 
+            <div className="position-relative">
+            <label for="password">Password
+                <span className="auth__form--link link">
+                <Link to="/resetpassword">{newAccount? "":"Forgot password?"}</Link>
+                </span>
+            </label>
+            </div>
+            <input className="auth__form--input"
+            id="password" 
+            type={showPW} 
             name="password" 
-            value={password}
-            placeholder="password" 
+            value={password}            
             required
             onChange={onChange} 
             />
-            <input type="submit" value={newAccount? "Sign Up": "Sign In"}/>
+            <label>
+                <input type="checkbox" onChange={showPassword}/>
+                {showPW==="password"? "Show" : "Hide"} Password
+            </label>
+
+            <input className="btn-m bg-accent clr-primary" type="submit" value={newAccount? "Sign up": "Sign in"}/> 
         </form>  
-            <div>Got an account? <span onClick={toggleAccount} style={{textDecoration:"underline",cursor:"pointer"}}>
-                {newAccount? "Sign In": "Sign Up"}</span></div>
         </>   
     )
 }
